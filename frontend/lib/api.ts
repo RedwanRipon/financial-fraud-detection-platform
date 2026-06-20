@@ -29,3 +29,32 @@ export async function predictTransaction(
   const response = await api.post<PredictionResponse>("/predict", data);
   return response.data;
 }
+
+export interface BatchSummary {
+  total: number;
+  predicted_fraud: number;
+  high_risk: number;
+  medium_risk: number;
+  low_risk: number;
+}
+
+export interface BatchTransactionResult {
+  row: number;
+  transaction_type: string;
+  amount: number;
+  fraud_probability: number;
+  prediction: string;
+  risk_level: string;
+}
+
+export interface BatchResponse {
+  summary: BatchSummary;
+  top_high_risk: BatchTransactionResult[];
+}
+
+export async function batchPredict(file: File): Promise<BatchResponse> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const response = await api.post<BatchResponse>("/batch-predict", formData);
+  return response.data;
+}
