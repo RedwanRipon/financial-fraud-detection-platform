@@ -1,6 +1,7 @@
 import os
 import joblib
 import pandas as pd
+import numpy as np
 
 from app.models.schemas import TransactionRequest, PredictionResponse
 
@@ -56,3 +57,29 @@ def predict_transaction(txn: TransactionRequest) -> PredictionResponse:
         fraud_probability=round(fraud_probability, 4),
         risk_level=risk_level,
     )
+
+def predict_dataframe(df: pd.DataFrame) -> pd.DataFrame:
+    """Predict fraud for every row in a DataFrame (used for batch upload)."""
+    df = df.copy()
+
+    # Recreate the same engineered features as training
+    df["type_encoded"] = df["type"].str.upper().map(TYPE_MAP).fillna(0).astype(int)
+    df["balance_change_orig"] = df["oldbalanceOrg"] - df["newbalanceOrig"]
+    df["balance_change_dest"] = df["newbalanceDest"] - df["oldbalanceDest"]
+
+    # If the CSV has 'step' but no hour, derive the hour
+    if "transaction_hour" not in df.columns:
+        df["transaction_hour"] = df["step"] % 24
+
+    # Predict probabilities for ALL rows at once (fast, vectorized)
+    X = df[feature_names]
+    proba = model.predict_proba(X)[:, 1]
+
+    df["fraud_probability"] = proba
+    df["prediction"] = np.where(proba >= 0.5, "Fraud", "Normal")
+    df["risk_level"] = np.select(
+        [proba >= 0.80, proba >= 0.50],
+        ["High", "Medium"],
+        default="Low",
+    )
+    return df

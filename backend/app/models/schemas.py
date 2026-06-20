@@ -36,3 +36,24 @@ class PredictionResponse(BaseModel):
     prediction: str = Field(..., description="Fraud or Normal")
     fraud_probability: float = Field(..., description="Probability between 0 and 1")
     risk_level: str = Field(..., description="High, Medium, or Low")
+
+class BatchSummary(BaseModel):
+    total: int
+    predicted_fraud: int
+    high_risk: int
+    medium_risk: int
+    low_risk: int
+
+
+class BatchTransactionResult(BaseModel):
+    row: int
+    transaction_type: str
+    amount: float
+    fraud_probability: float
+    prediction: str
+    risk_level: str
+
+
+class BatchResponse(BaseModel):
+    summary: BatchSummary
+    top_high_risk: list[BatchTransactionResult]
