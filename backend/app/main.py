@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from app.routes import predict
+from fastapi.middleware.cors import CORSMiddleware
 
 # Create the FastAPI application
 app = FastAPI(
@@ -7,6 +8,16 @@ app = FastAPI(
     description="Detects fraudulent transactions using XGBoost and explains them.",
     version="1.0.0",
 )
+
+# Allow the Next.js frontend to call this API
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 # Connect the prediction routes to the app
 app.include_router(predict.router)
