@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from app.routes import predict
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes import predict, batch_upload
+from app.database import Base, engine
+from app.models import db_models 
 
 # Create the FastAPI application
 app = FastAPI(
@@ -31,4 +33,7 @@ def read_root():
 @app.get("/health")
 def health_check():
     return {"status": "healthy"}
+
+
+Base.metadata.create_all(bind=engine)
 
