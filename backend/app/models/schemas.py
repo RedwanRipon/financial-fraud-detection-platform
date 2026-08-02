@@ -57,3 +57,21 @@ class BatchTransactionResult(BaseModel):
 class BatchResponse(BaseModel):
     summary: BatchSummary
     top_high_risk: list[BatchTransactionResult]
+
+
+# ---- Analytics ----
+class OverviewStats(BaseModel):
+    total_transactions: int
+    predicted_fraud: int
+    high_risk: int
+    avg_fraud_probability: float
+
+
+class CategoryCount(BaseModel):
+    label: str
+    count: int
+
+
+class ProbabilityBucket(BaseModel):
+    range: str
+    count: int

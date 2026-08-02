@@ -1,9 +1,9 @@
 from fastapi import FastAPI
-from app.routes import predict
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import predict, batch_upload
+
+from app.routes import predict, batch_upload, analytics
 from app.database import Base, engine
-from app.models import db_models 
+from app.models import db_models  # noqa: F401 (registers tables)
 
 # Create the FastAPI application
 app = FastAPI(
@@ -25,6 +25,9 @@ app.add_middleware(
 # Connect the prediction routes to the app
 app.include_router(predict.router)
 app.include_router(batch_upload.router)
+app.include_router(analytics.router)
+
+
 @app.get("/")
 def read_root():
     return {"message": "Fraud Detection API is running"}

@@ -1,9 +1,12 @@
 import io
 
 import pandas as pd
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
+from sqlalchemy.orm import Session
 
+from app.database import get_db
 from app.services.prediction_service import predict_dataframe
+from app.services.database_service import save_predictions_bulk
 from app.models.schemas import (
     BatchResponse,
     BatchSummary,
@@ -23,7 +26,10 @@ REQUIRED_COLUMNS = [
 
 
 @router.post("/batch-predict", response_model=BatchResponse)
-async def batch_predict(file: UploadFile = File(...)):
+async def batch_predict(
+    file: UploadFile = File(...), 
+    db: Session = Depends(get_db),
+    ):
     """Accept a CSV of transactions and predict fraud for each row."""
     if not file.filename.endswith(".csv"):
         raise HTTPException(status_code=400, detail="Please upload a .csv file")
@@ -41,7 +47,7 @@ async def batch_predict(file: UploadFile = File(...)):
         )
 
     result = predict_dataframe(df)
-
+    save_predictions_bulk(db, result) 
     summary = BatchSummary(
         total=len(result),
         predicted_fraud=int((result["prediction"] == "Fraud").sum()),
