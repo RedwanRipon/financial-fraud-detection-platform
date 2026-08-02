@@ -58,3 +58,43 @@ export async function batchPredict(file: File): Promise<BatchResponse> {
   const response = await api.post<BatchResponse>("/batch-predict", formData);
   return response.data;
 }
+
+// ---- Analytics ----
+export interface OverviewStats {
+  total_transactions: number;
+  predicted_fraud: number;
+  high_risk: number;
+  avg_fraud_probability: number;
+}
+
+export interface CategoryCount {
+  label: string;
+  count: number;
+}
+
+export interface ProbabilityBucket {
+  range: string;
+  count: number;
+}
+
+export async function getOverview(): Promise<OverviewStats> {
+  const response = await api.get<OverviewStats>("/analytics/overview");
+  return response.data;
+}
+
+export async function getFraudByType(): Promise<CategoryCount[]> {
+  const response = await api.get<CategoryCount[]>("/analytics/fraud-by-type");
+  return response.data;
+}
+
+export async function getFraudByHour(): Promise<CategoryCount[]> {
+  const response = await api.get<CategoryCount[]>("/analytics/fraud-by-hour");
+  return response.data;
+}
+
+export async function getProbabilityDistribution(): Promise<ProbabilityBucket[]> {
+  const response = await api.get<ProbabilityBucket[]>(
+    "/analytics/probability-distribution"
+  );
+  return response.data;
+}
