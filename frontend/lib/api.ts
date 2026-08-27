@@ -18,6 +18,7 @@ export interface TransactionRequest {
 
 // The shape we RECEIVE (matches the backend's PredictionResponse)
 export interface PredictionResponse {
+  id: number | null;
   prediction: string;
   fraud_probability: number;
   risk_level: string;
@@ -49,7 +50,7 @@ export interface BatchTransactionResult {
 
 export interface BatchResponse {
   summary: BatchSummary;
-  top_high_risk: BatchTransactionResult[];
+  results: BatchTransactionResult[];
 }
 
 export async function batchPredict(file: File): Promise<BatchResponse> {
@@ -77,25 +78,66 @@ export interface ProbabilityBucket {
   count: number;
 }
 
-export async function getOverview(): Promise<OverviewStats> {
-  const response = await api.get<OverviewStats>("/analytics/overview");
+export interface ScatterPoint {
+  amount: number;
+  fraud_probability: number;
+}
+
+export interface HighRiskItem {
+  id: number;
+  transaction_type: string;
+  amount: number;
+  fraud_probability: number;
+  risk_level: string;
+  created_at: string | null;
+}
+
+export interface AnalyticsFilters {
+  transaction_type?: string;
+  risk_level?: string;
+  days?: number;
+}
+
+export async function getOverview(f: AnalyticsFilters = {}): Promise<OverviewStats> {
+  const response = await api.get<OverviewStats>("/analytics/overview", { params: f });
   return response.data;
 }
 
-export async function getFraudByType(): Promise<CategoryCount[]> {
-  const response = await api.get<CategoryCount[]>("/analytics/fraud-by-type");
+export async function getFraudByType(f: AnalyticsFilters = {}): Promise<CategoryCount[]> {
+  const response = await api.get<CategoryCount[]>("/analytics/fraud-by-type", { params: f });
   return response.data;
 }
 
-export async function getFraudByHour(): Promise<CategoryCount[]> {
-  const response = await api.get<CategoryCount[]>("/analytics/fraud-by-hour");
+export async function getFraudByHour(f: AnalyticsFilters = {}): Promise<CategoryCount[]> {
+  const response = await api.get<CategoryCount[]>("/analytics/fraud-by-hour", { params: f });
   return response.data;
 }
 
-export async function getProbabilityDistribution(): Promise<ProbabilityBucket[]> {
+export async function getProbabilityDistribution(
+  f: AnalyticsFilters = {}
+): Promise<ProbabilityBucket[]> {
   const response = await api.get<ProbabilityBucket[]>(
-    "/analytics/probability-distribution"
+    "/analytics/probability-distribution",
+    { params: f }
   );
+  return response.data;
+}
+
+export async function getAmountVsProbability(
+  f: AnalyticsFilters = {}
+): Promise<ScatterPoint[]> {
+  const response = await api.get<ScatterPoint[]>("/analytics/amount-vs-probability", {
+    params: f,
+  });
+  return response.data;
+}
+
+export async function getTopHighRisk(
+  f: AnalyticsFilters = {}
+): Promise<HighRiskItem[]> {
+  const response = await api.get<HighRiskItem[]>("/analytics/top-high-risk", {
+    params: f,
+  });
   return response.data;
 }
 
@@ -125,6 +167,7 @@ export interface ExplanationResponse {
   top_factors: Factor[];
   llm_explanation: string;
   recommended_action: string;
+  created_at: string | null;
 }
 
 export async function getRecentPredictions(): Promise<PredictionListItem[]> {
