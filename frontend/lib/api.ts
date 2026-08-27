@@ -98,3 +98,41 @@ export async function getProbabilityDistribution(): Promise<ProbabilityBucket[]>
   );
   return response.data;
 }
+
+// ---- Explanation Report ----
+export interface PredictionListItem {
+  id: number;
+  transaction_type: string;
+  amount: number;
+  prediction: string;
+  fraud_probability: number;
+  risk_level: string;
+}
+
+export interface Factor {
+  feature: string;
+  importance: number;
+}
+
+export interface ExplanationResponse {
+  transaction_id: number;
+  transaction_type: string;
+  amount: number;
+  transaction_hour: number;
+  prediction: string;
+  fraud_probability: number;
+  risk_level: string;
+  top_factors: Factor[];
+  llm_explanation: string;
+  recommended_action: string;
+}
+
+export async function getRecentPredictions(): Promise<PredictionListItem[]> {
+  const response = await api.get<PredictionListItem[]>("/predictions/recent");
+  return response.data;
+}
+
+export async function getExplanation(id: number): Promise<ExplanationResponse> {
+  const response = await api.get<ExplanationResponse>(`/explanation/${id}`);
+  return response.data;
+}
