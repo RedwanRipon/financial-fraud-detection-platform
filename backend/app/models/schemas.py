@@ -75,3 +75,31 @@ class CategoryCount(BaseModel):
 class ProbabilityBucket(BaseModel):
     range: str
     count: int
+
+
+# ---- Explanation Report ----
+class PredictionListItem(BaseModel):
+    id: int
+    transaction_type: str
+    amount: float
+    prediction: str
+    fraud_probability: float
+    risk_level: str
+
+
+class Factor(BaseModel):
+    feature: str
+    importance: float
+
+
+class ExplanationResponse(BaseModel):
+    transaction_id: int
+    transaction_type: str
+    amount: float
+    transaction_hour: int
+    prediction: str
+    fraud_probability: float
+    risk_level: str
+    top_factors: list[Factor]
+    llm_explanation: str
+    recommended_action: str

@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routes import predict, batch_upload, analytics
+from app.routes import predict, batch_upload, analytics, explanation
 from app.database import Base, engine
 from app.models import db_models  # noqa: F401 (registers tables)
 
@@ -26,6 +26,7 @@ app.add_middleware(
 app.include_router(predict.router)
 app.include_router(batch_upload.router)
 app.include_router(analytics.router)
+app.include_router(explanation.router)
 
 
 @app.get("/")

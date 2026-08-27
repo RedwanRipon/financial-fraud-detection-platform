@@ -83,3 +83,12 @@ def predict_dataframe(df: pd.DataFrame) -> pd.DataFrame:
         default="Low",
     )
     return df
+
+
+def get_top_factors(n: int = 5) -> list[dict]:
+    """Return the model's top contributing features (global importances)."""
+    importances = model.feature_importances_
+    pairs = sorted(
+        zip(feature_names, importances), key=lambda x: x[1], reverse=True
+    )[:n]
+    return [{"feature": f, "importance": round(float(v), 3)} for f, v in pairs]
