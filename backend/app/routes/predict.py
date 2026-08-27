@@ -13,5 +13,6 @@ router = APIRouter()
 def predict(transaction: TransactionRequest, db: Session = Depends(get_db)):
     """Predict fraud for a single transaction and store the result."""
     result = predict_transaction(transaction)
-    save_prediction(db, transaction, result)
+    record = save_prediction(db, transaction, result)
+    result.id = record.id  # so the UI can fetch this prediction's explanation
     return result

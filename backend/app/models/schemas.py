@@ -33,6 +33,7 @@ class TransactionRequest(BaseModel):
 
 # What the API SENDS BACK (the response)
 class PredictionResponse(BaseModel):
+    id: int | None = Field(default=None, description="Stored prediction id")
     prediction: str = Field(..., description="Fraud or Normal")
     fraud_probability: float = Field(..., description="Probability between 0 and 1")
     risk_level: str = Field(..., description="High, Medium, or Low")
@@ -56,7 +57,7 @@ class BatchTransactionResult(BaseModel):
 
 class BatchResponse(BaseModel):
     summary: BatchSummary
-    top_high_risk: list[BatchTransactionResult]
+    results: list[BatchTransactionResult]
 
 
 # ---- Analytics ----
@@ -75,6 +76,20 @@ class CategoryCount(BaseModel):
 class ProbabilityBucket(BaseModel):
     range: str
     count: int
+
+
+class ScatterPoint(BaseModel):
+    amount: float
+    fraud_probability: float
+
+
+class HighRiskItem(BaseModel):
+    id: int
+    transaction_type: str
+    amount: float
+    fraud_probability: float
+    risk_level: str
+    created_at: str | None = None
 
 
 # ---- Explanation Report ----
@@ -103,3 +118,4 @@ class ExplanationResponse(BaseModel):
     top_factors: list[Factor]
     llm_explanation: str
     recommended_action: str
+    created_at: str | None = None

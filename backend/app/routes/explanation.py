@@ -62,4 +62,5 @@ def explanation(prediction_id: int, db: Session = Depends(get_db)):
         top_factors=get_top_factors(),
         llm_explanation=pred.llm_explanation,
         recommended_action=pred.recommended_action,
+        created_at=pred.created_at.isoformat() if pred.created_at else None,
     )

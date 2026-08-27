@@ -56,18 +56,26 @@ async def batch_predict(
         low_risk=int((result["risk_level"] == "Low").sum()),
     )
 
-    # Top 5 most suspicious transactions
-    top = result.sort_values("fraud_probability", ascending=False).head(5)
-    top_high_risk = [
+    # All rows (fast, vectorized) — the frontend derives the top-5 and CSV download
+    res = result.reset_index(drop=True)
+    results = [
         BatchTransactionResult(
-            row=int(idx) + 1,
-            transaction_type=str(r["type"]),
-            amount=float(r["amount"]),
-            fraud_probability=round(float(r["fraud_probability"]), 4),
-            prediction=str(r["prediction"]),
-            risk_level=str(r["risk_level"]),
+            row=i + 1,
+            transaction_type=str(t),
+            amount=float(a),
+            fraud_probability=round(float(p), 4),
+            prediction=str(pr),
+            risk_level=str(rl),
         )
-        for idx, r in top.iterrows()
+        for i, (t, a, p, pr, rl) in enumerate(
+            zip(
+                res["type"],
+                res["amount"],
+                res["fraud_probability"],
+                res["prediction"],
+                res["risk_level"],
+            )
+        )
     ]
 
-    return BatchResponse(summary=summary, top_high_risk=top_high_risk)
+    return BatchResponse(summary=summary, results=results)
