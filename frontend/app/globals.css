@@ -1,1 +1,9 @@
 @import "tailwindcss";
+
+/* Tailwind v4 removed the default pointer cursor on buttons.
+   Kept UNLAYERED so it always beats Tailwind's base-layer reset. */
+button:not(:disabled),
+[role="button"]:not(:disabled),
+label[for] {
+  cursor: pointer;
+}
